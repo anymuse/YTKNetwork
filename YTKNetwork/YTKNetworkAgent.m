@@ -169,7 +169,7 @@
     NSString *url = [self buildRequestUrl:request];
     id param = request.requestArgument;
     if (param) {
-        param = @{@"para": [param jsonStringEncoded]};
+        param = @{@"para": [self jsonStringEncoded:param]};
     }
     AFConstructingBlock constructingBlock = [request constructingBodyBlock];
     AFHTTPRequestSerializer *requestSerializer = [self requestSerializerForRequest:request];
@@ -192,6 +192,16 @@
         case YTKRequestMethodPATCH:
             return [self dataTaskWithHTTPMethod:@"PATCH" requestSerializer:requestSerializer URLString:url parameters:param error:error];
     }
+}
+
+- (NSString *)jsonStringEncoded:(NSDictionary *)param {
+    if ([NSJSONSerialization isValidJSONObject:param]) {
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:param options:0 error:&error];
+        NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        return json;
+    }
+    return nil;
 }
 
 - (void)addRequest:(YTKBaseRequest *)request {
